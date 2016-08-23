@@ -44,6 +44,26 @@ exports.getCurrentBranch = function() {
     }
 };
 
+
+//获取本地IP
+exports.getLocalIp = function(){
+    var ret = [];
+    try{
+        var ips = os.networkInterfaces();
+        for(var k in ips) {
+            var a = ips[k];
+            for (var j = 0; j < a.length; j++) {
+                var o = a[j];
+                if (o.family == "IPv4" && o.internal === false) {
+                    ret.push(o.address);
+                }
+            }
+        }
+
+    }catch(e){}
+    return ret.join("/") || "localhost";
+};
+
 //获取参数列表
 exports.getArgs = function() {
     var argv = process.argv.slice(2);
