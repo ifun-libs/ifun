@@ -1,43 +1,84 @@
+var fs = require("fs");
 var cp = require("child_process");
-var {isString,isArray} = require("util");
+var {isString,isNullOrUndefined} = require("util");
 
 //提示
-var log = exports.log = function(message){
-    console.log(message);
-    //process.argv.indexOf("--show") && console.log(__dirfile);
+var log = exports.log = function(...args){
+    console.log(...args);
 };
 
 //获取JSON
 exports.requireJson = function(file){
-    var json;
-    try{
-        json = require(file);
-    }catch(e){
-        json = {};
+    if(fs.existsSync(file)){
+        return require(file);
     }
-    return json;
+    return {};
+};
+
+exports.getType = function(o) {
+    var _t; return ((_t = typeof(o)) == "object" ? o==null && "null" || Object.prototype.toString.call(o).slice(8,-1):_t).toLowerCase();
+};
+
+exports.duoTai = function(methods, args){
+    var types = [];
+    Array.from(args).forEach( x => {
+        !isNullOrUndefined(x) && types.push(exports.getType(x).slice(0,3));
+    });
+    var mm;
+    for(var m in methods){
+        mm = m.split("_");
+        var isHit = types.every(function(x,i){
+            return mm[i].toLowerCase().includes(x);
+        });
+        if(isHit){
+            return methods[m](...args);
+        }
+    }
+    throw "arguments type is not match!";
+};
+
+var cmdMethod = {
+    strArr_fun: function(cmdExp, callback){
+        var ops = {
+            args: cmdExp
+        };
+        return this.obj_fun(ops, callback);
+    },
+    strArr_str_fun: function(cmdExp, dir, callback){
+        var ops = {
+            args: cmdExp
+        };
+        if(dir){
+            ops.dir = dir;
+        }
+        return this.obj_fun(ops, callback);
+    },
+    obj_fun: function(ops, callback){
+        process.argv.indexOf("--show")>-1 && log(ops.args);
+        if(isString(ops.args)){
+            ops.args = ops.args.split(/\s+/);
+        }
+        return [ops, callback];
+    }
 };
 
 //spawn封装
 //ops类型: String/Array/PlainObject
-exports.cmd = function(ops, callback) {
-    if(isString(ops) || isArray(ops)){
-        ops = {
-            text: ops
-        };
-    }
-    var args = ops.text;
-    if(isString(args)) {
-        args = args.split(/\s+/);
-    }
+exports.cmd = function() {
+    var [ops,callback] = exports.duoTai(cmdMethod, arguments);
+
+    var args = ops.args;
     var cmdName = args.shift();
     if(cmdName=="npm" && process.platform=="win32"){
         cmdName = "npm.cmd"
     }
-    ops.stdio = ops.stdio || "inherit";
     ops.shell = ops.shell!==false;
+    if(ops.dir){
+        ops.cwd = ops.dir;
+    }
 
     if(callback) {
+        ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
             log("data:", data.toString());
@@ -49,36 +90,12 @@ exports.cmd = function(ops, callback) {
             callback(code !== 0);
         });
     }else{
-        cp.spawnSync(cmdName, args, ops);
+        return cp.spawnSync(cmdName, args, ops).stdout.toString().trim();
     }
-};
-
-//spawn封装
-exports.spawn_bak = function(cmdExp, callback, dir) {
-    var args = cmdExp;
-    if(typeof args=="string") {
-        args = args.split(/\s+/);
-    }
-    var cmd = args.shift();
-    if(cmd=="npm" && process.platform=="win32"){
-        cmd = "npm.cmd"
-    }
-    var ops = {stdio:"inherit",shell:true};
-    if(dir){
-        ops.cwd = dir;
-    }
-    var sp = cp.spawn(cmd, args, ops);
-    sp.on("data", data => {
-        console.log("error:",data.toString());
-    });
-
-    callback && sp.on('close', code => {
-        callback(code!==0);
-    });
 };
 
 //同步执行
-exports.cmd_bak = function(cmdExp){
+exports.syncCmd = function(cmdExp){
     var sudo = process.platform!="win32"&&process.env.USER!="root" ? "sudo " : "";
     sudo  = !cmdExp.includes("sudo") && cmdExp.includes("npm") && cmdExp.includes("-g") && sudo || "";
     process.argv.indexOf("--show") && log(`cmd: ${cmdExp}`);
@@ -92,14 +109,9 @@ exports.end = function(message){
 };
 
 //获取当前分支
-exports.getCurrentBranch = function() {
-    try {
-        return cp.execSync("git rev-parse --abbrev-ref HEAD").toString().trim();
-    } catch (e) {
-        return null;
-    }
+exports.getCurrentBranch = function(dir) {
+    return exports.cmd("git rev-parse --abbrev-ref HEAD", dir);
 };
-
 
 //获取本地IP
 exports.getLocalIp = function(){
@@ -145,7 +157,7 @@ exports.getArgs = function() {
             });
         }else{
             if(keys[i]){
-                args[keys[i]] = true;
+                args[keys[i]] = k;
             }else {
                 args.more.push(k);
             }
@@ -164,6 +176,17 @@ exports.parseDot = function(args, kk, v){
         args[k] = v;
     }
 };
+
+//字节大小格式化
+exports.byteFormat = function(byte, i=0, n=10){
+    var units = ["B","KB","MB","GB","TB","PB","EB","ZB","YB","DB","NB"];
+    if(byte<Math.pow(2,n) || i==units.length-1){
+        var num = byte / Math.pow(2,n-10);
+        return num.toFixed(2)*100/100 + units[i];
+    }
+    return exports.byteFormat(byte, i+1, n+10);
+};
+
 
 exports.read = function (prompt, callback) {
     process.stdout.write(prompt + ':');
