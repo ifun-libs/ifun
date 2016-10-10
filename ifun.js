@@ -54,7 +54,7 @@ var cmdMethod = {
         return this.obj_fun(ops, callback);
     },
     obj_fun: function(ops, callback){
-        process.argv.indexOf("--show")>-1 && log(ops.args);
+        process.argv.indexOf("--show")>-1 && log("cmd:",ops.args);
         if(isString(ops.args)){
             ops.args = ops.args.split(/\s+/);
         }
