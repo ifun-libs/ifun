@@ -1,6 +1,6 @@
 {
     "name": "ifun",
-    "version": "0.1.6",
+    "version": "0.1.8",
     "description": "some utility function",
     "main": "ifun.js",
     "scripts": {

@@ -78,6 +78,10 @@ exports.cmd = function() {
     }
 
     if(callback) {
+        if(/ssh|scp|nobox/.test(cmdName)){
+            log([cmdName,...args].join(" "));
+            return callback(0);
+        }
         ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
@@ -147,7 +151,7 @@ exports.getArgs = function() {
             if(/\./.test(k)) {
                 exports.parseDot(args,k.split("."),v);
             }else{
-                args[k] = v;
+                args[k] = exports.parseDou(v);
             }
         }else if(/^\-\-(\w+)$/.test(k)){
             args[RegExp.$1] = true;
@@ -173,8 +177,13 @@ exports.parseDot = function(args, kk, v){
         args[k] = args[k] || {};
         exports.parseDot(args[k],kk,v);
     }else{
-        args[k] = v;
+        args[k] = exports.parseDou(v);
     }
+};
+
+//解析多个,相隔开的value
+exports.parseDou = function(v){
+    return /,/.test(v) ? v.split(",") : v;
 };
 
 //字节大小格式化
