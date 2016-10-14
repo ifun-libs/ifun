@@ -78,10 +78,13 @@ exports.cmd = function() {
     }
 
     if(callback) {
+        //模拟命令
+        /*
         if(/ssh|scp|nobox/.test(cmdName)){
             log([cmdName,...args].join(" "));
             return callback(0);
         }
+        */
         ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
