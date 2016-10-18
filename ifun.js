@@ -73,6 +73,7 @@ exports.cmd = function() {
         cmdName = "npm.cmd"
     }
     ops.shell = ops.shell!==false;
+    ops.stdio = ops.stdio || "inherit";
     if(ops.dir){
         ops.cwd = ops.dir;
     }
@@ -85,7 +86,6 @@ exports.cmd = function() {
             return callback(0);
         }
         */
-        ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
             log("data:", data.toString());
