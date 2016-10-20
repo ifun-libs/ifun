@@ -73,7 +73,7 @@ exports.cmd = function() {
         cmdName = "npm.cmd"
     }
     ops.shell = ops.shell!==false;
-    ops.stdio = ops.stdio || "inherit";
+    //ops.stdio = ops.stdio || "inherit";
     if(ops.dir){
         ops.cwd = ops.dir;
     }
@@ -86,6 +86,7 @@ exports.cmd = function() {
             return callback(0);
         }
         */
+        ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
             log("data:", data.toString());
@@ -186,7 +187,8 @@ exports.parseDot = function(args, kk, v){
 
 //解析多个,相隔开的value
 exports.parseDou = function(v){
-    return /,/.test(v) ? v.split(",") : v;
+    return v; //暂时不解析逗号
+    //return /,/.test(v) ? v.split(",") : v;
 };
 
 //字节大小格式化
