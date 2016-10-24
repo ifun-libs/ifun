@@ -26,12 +26,14 @@ exports.duoTai = function(methods, args){
     });
     var mm;
     for(var m in methods){
-        mm = m.split("_");
-        var isHit = types.every(function(x,i){
-            return mm[i].toLowerCase().includes(x);
-        });
-        if(isHit){
-            return methods[m](...args);
+        if(methods.hasOwnProperty(m)) {
+            mm = m.split("_");
+            var isHit = types.every(function (x, i) {
+                return mm[i].toLowerCase().includes(x);
+            });
+            if (isHit) {
+                return methods[m](...args);
+            }
         }
     }
     throw "arguments type is not match!";
@@ -54,10 +56,10 @@ var cmdMethod = {
         return this.obj_fun(ops, callback);
     },
     obj_fun: function(ops, callback){
-        process.argv.indexOf("--show")>-1 && log("cmd:",ops.args);
         if(isString(ops.args)){
             ops.args = ops.args.split(/\s+/);
         }
+        process.argv.indexOf("--show")>-1 && log("cmd:",ops.args.join(" "));
         return [ops, callback];
     }
 };
@@ -73,11 +75,13 @@ exports.cmd = function() {
         cmdName = "npm.cmd"
     }
     ops.shell = ops.shell!==false;
-    //ops.stdio = ops.stdio || "inherit";
+    ops.stdio = ops.stdio || "inherit";
     if(ops.dir){
         ops.cwd = ops.dir;
     }
 
+
+    ops.stdio = ops.stdio || "inherit";
     if(callback) {
         //模拟命令
         /*
@@ -86,7 +90,6 @@ exports.cmd = function() {
             return callback(0);
         }
         */
-        ops.stdio = ops.stdio || "inherit";
         var sp = cp.spawn(cmdName, args, ops);
         sp.on("data", data => {
             log("data:", data.toString());
@@ -98,12 +101,30 @@ exports.cmd = function() {
             callback(code !== 0);
         });
     }else{
-        return cp.spawnSync(cmdName, args, ops).stdout.toString().trim();
+        cp.spawnSync(cmdName, args, ops);
     }
 };
 
-//同步执行
-exports.syncCmd = function(cmdExp){
+//同步返回结果
+exports.getCmd = function(){
+    var [ops, callback] = exports.duoTai(cmdMethod, arguments);
+
+    var args = ops.args;
+    var cmdName = args.shift();
+    if(cmdName=="npm" && process.platform=="win32"){
+        cmdName = "npm.cmd"
+    }
+    ops.shell = ops.shell!==false;
+    if(ops.dir){
+        ops.cwd = ops.dir;
+    }
+    // 以上同cmd,待优化
+
+    return cp.spawnSync(cmdName, args, ops).stdout.toString().trim();
+};
+
+//同步返回结果
+exports.cmdSync_bak = function(cmdExp){
     var sudo = process.platform!="win32"&&process.env.USER!="root" ? "sudo " : "";
     sudo  = !cmdExp.includes("sudo") && cmdExp.includes("npm") && cmdExp.includes("-g") && sudo || "";
     process.argv.indexOf("--show") && log(`cmd: ${cmdExp}`);
@@ -118,7 +139,7 @@ exports.end = function(message){
 
 //获取当前分支
 exports.getCurrentBranch = function(dir) {
-    return exports.cmd("git rev-parse --abbrev-ref HEAD", dir);
+    return exports.getCmd("git rev-parse --abbrev-ref HEAD", dir);
 };
 
 //获取本地IP
