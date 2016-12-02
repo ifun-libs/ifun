@@ -28,22 +28,22 @@ exports.getClientIp = function (req) {
         }
         return "";
     };
-    var ip;
-    try{
-        ip = getIp(req.headers['x-forwarded-for']);
-    }catch(e){
-        try{
+    var ip = getIp(req.headers['x-forwarded-for']);
+    if(!ip) {
+        try {
             ip = getIp(req.connection.remoteAddress);
-        }catch(e2){
-            try{
-                ip = getIp(req.socket.remoteAddress);
-            }catch(e3){
-                try {
-                    ip = getIp(req.connection.socket.remoteAddress);
-                }catch(e4){
-                    ip = "";
-                }
-            }
+        } catch (e2) {}
+    }
+    if(!ip) {
+        try {
+            ip = getIp(req.socket.remoteAddress);
+        } catch (e3) {}
+    }
+    if(!ip){
+        try {
+            ip = getIp(req.connection.socket.remoteAddress);
+        }catch(e4){
+            ip = "";
         }
     }
     return ip || exports.getMyIp();

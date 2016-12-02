@@ -143,10 +143,10 @@ exports.getCurrentBranch = function(dir) {
 };
 
 //获取本地IP
-exports.getLocalIp = function(){
+exports.getLocalIp = exports.getClientIp = function(){
     var ret = [];
     try{
-        var ips = os.networkInterfaces();
+        var ips = require("os").networkInterfaces();
         for(var k in ips) {
             var a = ips[k];
             for (var j = 0; j < a.length; j++) {
