@@ -1,15 +1,15 @@
 {
-    "name": "ifun",
-    "version": "0.2.5",
-    "description": "some utility function",
-    "main": "ifun.js",
-    "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "keywords": [
-        "ifun",
-        "fun"
-    ],
-    "author": "likaituan",
-    "license": "MIT"
+  "name": "ifun",
+  "version": "0.2.6",
+  "description": "some utility function",
+  "main": "ifun.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "ifun",
+    "fun"
+  ],
+  "author": "likaituan",
+  "license": "MIT"
 }
