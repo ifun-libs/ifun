@@ -233,4 +233,12 @@ exports.read = function (prompt, callback) {
     });
 };
 
+exports.getCode = function(file){
+    fs.readFileSync(file).toString().trim();
+};
+
+exports.setCode = function(file,code){
+    fs.writeFileSync(file, code.trim());
+};
+
 Object.assign(exports, require("./ip"));
