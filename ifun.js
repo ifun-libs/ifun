@@ -234,7 +234,7 @@ exports.read = function (prompt, callback) {
 };
 
 exports.getCode = function(file){
-    fs.readFileSync(file).toString().trim();
+    return fs.readFileSync(file).toString().trim();
 };
 
 exports.setCode = function(file,code){
