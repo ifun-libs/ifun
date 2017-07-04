@@ -53,7 +53,7 @@ module.exports = function(userAgent){
 
     ua.isPc = !ua.isMobile;
     ua.isPad = /pad/i.test(_ua);
-    ua.isPhone = ua.isIphone || ua.Android && !ua.isPad;
+    ua.isPhone = ua.isIphone || ua.isAndroid && !ua.isPad;
 
     ua.deviceType = filterItem(ua, 'Pc', 'Pad', 'Phone');
     ua.device = 'unknown'; //暂时不好判断
