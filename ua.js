@@ -32,7 +32,7 @@ module.exports = function(userAgent){
     ua.isFirefox = /firefox/i.test(_ua);
     ua.isIe = /msie/i.test(_ua);
     ua.isOpera = /opera/i.test(_ua);
-    ua.isWechat = /MicroMessenger/i.test(_ua);
+    ua.isWechat = /MicroMessenger|MQQBrowser/i.test(_ua);
 
     ua.isCordova = typeof(window)=="object" && window.cordova ? true : false;
 
@@ -40,7 +40,7 @@ module.exports = function(userAgent){
     ua.isIos = ua.isIphone || ua.isIpad;
     ua.isMobile = ua.isIos || ua.isAndroid;
 
-    ua.isNative = ua.isMobile && !ua.isBrowser && !ua.isWeixin; //有问题
+    ua.isNative = ua.isMobile && !ua.isBrowser && !ua.isWechat; //有问题
 
     ua.isWindow = /window/i.test(_ua);
     ua.isMac = /Macintosh/i.test(_ua);
@@ -52,8 +52,8 @@ module.exports = function(userAgent){
 
     ua.deviceType = filterItem(ua, 'Pc', 'Pad', 'Phone');
     ua.device = 'unknown'; //暂时不好判断
-    ua.os = filterItem(ua, 'Window', 'Mac', 'Linux', 'Ios', 'Android');
-    ua.browser = filterItem(ua, 'Chrome', 'Safari', 'Firefox', 'Ie', 'Opera', 'Wechat');
+    ua.os = filterItem(ua, 'Ios', 'Android', 'Window', 'Mac', 'Linux');
+    ua.browser = filterItem(ua, 'Wechat', 'Chrome', 'Safari', 'Firefox', 'Ie', 'Opera');
 
     return ua;
 };
