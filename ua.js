@@ -4,18 +4,29 @@
  */
 
 /*
-手机浏览器: "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G36 Safari/601.1",
+手机浏览器示例: "Mozilla/5.0 (iPhone; CPU iPhone OS 9_3_5 like Mac OS X) AppleWebKit/601.1.46 (KHTML, like Gecko) Version/9.0 Mobile/13G36 Safari/601.1",
 MacBook: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36",
+ */
 
+/*
+Mac浏览器示例:
+Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"
  */
 
 
-module.exports = function(){
-    var _ua = navigator.userAgent;
+// 选择符合条件的一个
+var filterItem = function (ua, ...args) {
+    return args.filter(x=>ua['is'+x])[0] || 'unknown';
+};
+
+module.exports = function(userAgent){
     var ua = {};
+    var _ua = ua.source = userAgent || navigator.userAgent;
+
     ua.isIphone = /iphone/i.test(_ua);
     ua.isIpad = /ipad/i.test(_ua);
     ua.isAndroid = /android/i.test(_ua);
+
     ua.isChrome = /chrome/i.test(_ua);
     ua.isSafari = /safari/i.test(_ua) && !ua.isChrome;
     ua.isFirefox = /firefox/i.test(_ua);
@@ -28,8 +39,21 @@ module.exports = function(){
     ua.isBrowser = ua.isSafari || ua.isChrome || ua.isFirefox || ua.isIe || ua.isOpera;
     ua.isIos = ua.isIphone || ua.isIpad;
     ua.isMobile = ua.isIos || ua.isAndroid;
-    ua.isPc = !ua.isMobile;
+
     ua.isNative = ua.isMobile && !ua.isBrowser && !ua.isWeixin; //有问题
+
+    ua.isWindow = /window/i.test(_ua);
+    ua.isMac = /Macintosh/i.test(_ua);
+    ua.isLinux = /Linux/i.test(_ua);
+
+    ua.isPc = !ua.isMobile;
+    ua.isPad = /pad/i.test(_ua);
+    ua.isPhone = ua.isIphone || ua.Android && !ua.isPad;
+
+    ua.deviceType = filterItem(ua, 'Pc', 'Pad', 'Phone');
+    ua.device = 'unknown'; //暂时不好判断
+    ua.os = filterItem(ua, 'Window', 'Mac', 'Linux', 'Ios', 'Android');
+    ua.browser = filterItem(ua, 'Chrome', 'Safari', 'Firefox', 'Ie', 'Opera', 'Weixin');
 
     return ua;
 };
