@@ -1,3 +1,4 @@
+let os = require('os');
 
 //获取本机IP
 exports.getMyIp = function(){
@@ -14,7 +15,8 @@ exports.getMyIp = function(){
                 }
             }
         }
-    }catch(e){
+    }catch(err){
+        console.log({err});
         return "localhost";
     }
 };
